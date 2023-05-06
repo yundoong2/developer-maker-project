@@ -1,17 +1,15 @@
 package com.project.dmaker.controller;
 
 import com.project.dmaker.dto.CreateDeveloper;
+import com.project.dmaker.dto.DeveloperDetailDto;
+import com.project.dmaker.dto.DeveloperDto;
+import com.project.dmaker.dto.UpdateDeveloper;
 import com.project.dmaker.service.DMakerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -22,18 +20,31 @@ public class DMakerController {
     private final DMakerService dMakerService;
 
     @GetMapping("/developers")
-    public List<String> getAllDevelopers() {
+    public List<DeveloperDto> getAllDevelopers() {
         log.info("GET /developers HTTP/1.1");
 
-        return Arrays.asList("steve", "chris", "john");
+        return dMakerService.getAllDevelopers();
+    }
+
+    @GetMapping("/developer/{memberId}")
+    public DeveloperDetailDto getAllDevelopers(@PathVariable("memberId") String memberId) {
+        log.info("GET /developers/{memberId} HTTP/1.1");
+
+        return dMakerService.getDeveloperDetail(memberId);
     }
 
     @PostMapping("/create-developer")
-    public List<String> createDeveloper(@Validated @RequestBody CreateDeveloper.Request request ) {
+    public CreateDeveloper.Response createDeveloper(@Validated @RequestBody CreateDeveloper.Request request ) {
         log.info("request = {}", request);
 
-        dMakerService.createDeveloper(request);
+        return dMakerService.createDeveloper(request);
+    }
 
-        return Collections.singletonList("steve");
+    @PutMapping("/developer/{memberId}")
+    public DeveloperDetailDto updateDeveloper(@PathVariable("memberId") String memberId,
+                                              @Validated @RequestBody UpdateDeveloper.Request request) {
+        log.info("requestDto = {}", request);
+
+        return dMakerService.updateDeveloper(memberId, request);
     }
 }

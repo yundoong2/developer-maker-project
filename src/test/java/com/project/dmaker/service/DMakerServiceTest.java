@@ -10,7 +10,6 @@ import com.project.dmaker.repository.DeveloperRepository;
 import com.project.dmaker.repository.RetiredDeveloperRepository;
 import com.project.dmaker.type.DeveloperLevel;
 import com.project.dmaker.type.DeveloperSkillType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -61,8 +62,6 @@ class DMakerServiceTest {
         return request;
     }
 
-
-
     @Test
     public void getDeveloperDetail() {
         //given
@@ -83,6 +82,8 @@ class DMakerServiceTest {
         //given
         given(developerRepository.findByMemberId(anyString()))
                 .willReturn(Optional.empty());
+        given(developerRepository.save(any()))
+                .willReturn(getDeveloper());
 
         ArgumentCaptor<Developer> captor = ArgumentCaptor.forClass(Developer.class);
         //when
@@ -97,8 +98,6 @@ class DMakerServiceTest {
         assertEquals(DeveloperSkillType.FRONT_END, savedDeveloper.getDeveloperSkillType());
         assertEquals(12, savedDeveloper.getExperienceYears());
     }
-
-
 
     @Test
     void createDeveloperTest_failed_with_duplicated() {

@@ -12,6 +12,7 @@ import com.project.dmaker.exception.DMakerException;
 import com.project.dmaker.repository.DeveloperRepository;
 import com.project.dmaker.repository.RetiredDeveloperRepository;
 import com.project.dmaker.type.DeveloperLevel;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,20 +32,12 @@ public class DMakerService {
     public CreateDeveloper.Response createDeveloper(CreateDeveloper.Request request) {
         validateCreateDeveloperRequest(request);
 
-        Developer developer = Developer.builder()
-                .developerLevel(request.getDeveloperLevel())
-                .developerSkillType(request.getDeveloperSkillType())
-                .experienceYears(request.getExperienceYears())
-                .memberId(request.getMemberId())
-                .name(request.getName())
-                .age(request.getAge())
-                .statusCode(StatusCode.EMPLOYED)
-                .build();
-
-        developerRepository.save(developer);
-        return CreateDeveloper.Response.fromEntity(developer);
+        return CreateDeveloper.Response.fromEntity(
+                developerRepository.save(createDeveloperFromRequest(request))
+        );
     }
 
+    @Transactional(readOnly = true)
     public List<DeveloperDto> getAllEmployedDevelopers() {
         return developerRepository.findDevelopersByStatusCodeEquals(StatusCode.EMPLOYED)
                 .stream()
@@ -52,61 +45,27 @@ public class DMakerService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public DeveloperDetailDto getDeveloperDetail(String memberId) {
-        return developerRepository.findByMemberId(memberId)
-                .map(DeveloperDetailDto::fromEntity)
-                .orElseThrow(() -> new DMakerException(DMakerErrorCode.NO_DEVELOPER));
+        return DeveloperDetailDto.fromEntity(getDeveloperByMemberId(memberId));
     }
 
     @Transactional
     public DeveloperDetailDto updateDeveloper(String memberId, UpdateDeveloper.Request request) {
-        validateUpdateDeveloperRequest(request);
 
-        Developer developer = developerRepository.findByMemberId(memberId)
-                .orElseThrow(() -> {
-                    throw new DMakerException(DMakerErrorCode.NO_DEVELOPER);
-                });
+        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
 
+        return DeveloperDetailDto.fromEntity(
+                setDeveloperFromRequest(request, getDeveloperByMemberId(memberId))
+        );
+    }
+
+    private static Developer setDeveloperFromRequest(UpdateDeveloper.Request request, Developer developer) {
         developer.setDeveloperLevel(request.getDeveloperLevel());
         developer.setDeveloperSkillType(request.getDeveloperSkillType());
         developer.setExperienceYears(request.getExperienceYears());
 
-//        developerRepository.save(developer);
-
-        return DeveloperDetailDto.fromEntity(developer);
-    }
-
-    private void validateUpdateDeveloperRequest(UpdateDeveloper.Request request) {
-        //business validation
-        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
-    }
-
-    private void validateCreateDeveloperRequest(CreateDeveloper.Request request) {
-        //business validation
-        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
-
-        developerRepository.findByMemberId(request.getMemberId())
-                .ifPresent(developer -> {
-                    throw new DMakerException(DMakerErrorCode.DUPLICATED_MEMBER_ID);
-                });
-    }
-
-    private static void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
-        log.info("developerLevel = {}", developerLevel);
-
-        if (developerLevel == DeveloperLevel.SENIOR
-                && experienceYears < 10) {
-            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-
-        if (developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
-            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
-
-        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+        return developer;
     }
 
     @Transactional
@@ -125,5 +84,52 @@ public class DMakerService {
 
         retiredDeveloperRepository.save(retiredDeveloper);
         return DeveloperDetailDto.fromEntity(developer);
+    }
+
+
+    private void validateCreateDeveloperRequest(@NonNull CreateDeveloper.Request request) {
+        //business validation
+        validateDeveloperLevel(request.getDeveloperLevel(), request.getExperienceYears());
+
+        developerRepository.findByMemberId(request.getMemberId())
+                .ifPresent(developer -> {
+                    throw new DMakerException(DMakerErrorCode.DUPLICATED_MEMBER_ID);
+                });
+    }
+
+    private static void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
+        if (developerLevel == DeveloperLevel.SENIOR
+                && experienceYears < 10) {
+            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        if (developerLevel == DeveloperLevel.JUNGNIOR
+                && (experienceYears < 4 || experienceYears > 10)) {
+            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+
+        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
+        }
+    }
+
+    private Developer getDeveloperByMemberId(String memberId) {
+        return developerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    throw new DMakerException(DMakerErrorCode.NO_DEVELOPER);
+                });
+    }
+
+    private static Developer createDeveloperFromRequest(CreateDeveloper.Request request) {
+
+        return Developer.builder()
+                .developerLevel(request.getDeveloperLevel())
+                .developerSkillType(request.getDeveloperSkillType())
+                .experienceYears(request.getExperienceYears())
+                .memberId(request.getMemberId())
+                .name(request.getName())
+                .age(request.getAge())
+                .statusCode(StatusCode.EMPLOYED)
+                .build();
     }
 }

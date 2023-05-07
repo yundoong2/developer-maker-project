@@ -1,8 +1,8 @@
 package com.project.dmaker.entity;
 
+import com.project.dmaker.code.StatusCode;
 import com.project.dmaker.type.DeveloperLevel;
 import com.project.dmaker.type.DeveloperSkillType;
-import com.project.dmaker.code.StatusCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

@@ -1,12 +1,12 @@
 package com.project.dmaker.controller;
 
-import com.project.dmaker.dto.CreateDeveloper;
-import com.project.dmaker.dto.DeveloperDetailDto;
-import com.project.dmaker.dto.DeveloperDto;
-import com.project.dmaker.dto.UpdateDeveloper;
+import com.project.dmaker.dto.*;
+import com.project.dmaker.exception.DMakerException;
 import com.project.dmaker.service.DMakerService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +34,7 @@ public class DMakerController {
     }
 
     @PostMapping("/create-developer")
-    public CreateDeveloper.Response createDeveloper(@Validated @RequestBody CreateDeveloper.Request request ) {
+    public CreateDeveloper.Response createDeveloper(@Validated @RequestBody CreateDeveloper.Request request) {
         log.info("request = {}", request);
 
         return dMakerService.createDeveloper(request);
@@ -53,5 +53,17 @@ public class DMakerController {
 
         return dMakerService.deleteDeveloper(memberId);
 
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(DMakerException.class)
+    public DMakerErrorResponse handleException(DMakerException e, HttpServletRequest request) {
+        log.error("errorCode: {}, url: {}, message: {}",
+                e.getDMakerErrorCode(), request.getRequestURI(), e.getDetailMessage());
+
+        return DMakerErrorResponse.builder()
+                .errorCode(e.getDMakerErrorCode())
+                .errorMessage(e.getDetailMessage())
+                .build();
     }
 }

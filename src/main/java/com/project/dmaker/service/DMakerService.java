@@ -12,6 +12,7 @@ import com.project.dmaker.exception.DMakerException;
 import com.project.dmaker.repository.DeveloperRepository;
 import com.project.dmaker.repository.RetiredDeveloperRepository;
 import com.project.dmaker.type.DeveloperLevel;
+import com.project.dmaker.type.DeveloperLevelV2;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,19 +99,16 @@ public class DMakerService {
     }
 
     private static void validateDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
-        if (developerLevel == DeveloperLevel.SENIOR
-                && experienceYears < 10) {
-            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
 
-        if (developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
+        if (experienceYears < developerLevel.getMinExperienceYears() ||
+                experienceYears > developerLevel.getMaxExperienceYears()) {
             throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
+    }
 
-        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
-            throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
-        }
+    private static void validateDeveloperLevelV2(DeveloperLevelV2 developerLevel, Integer experienceYears) {
+
+        developerLevel.validateExperienceYears(experienceYears);
     }
 
     private Developer getDeveloperByMemberId(String memberId) {

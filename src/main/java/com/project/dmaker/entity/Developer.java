@@ -11,6 +11,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * 개발자 Entity
+ * @author cyh68
+ * @since 2023-05-08
+ **/
 @Getter
 @Setter
 @Builder
@@ -18,28 +23,43 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "DEVELOPER")
 public class Developer {
+
+    //고유 ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
+    //개발자 레벨
     @Enumerated(EnumType.STRING)
     private DeveloperLevel developerLevel;
 
+    //개발자 직무 타입
     @Enumerated(EnumType.STRING)
     private DeveloperSkillType developerSkillType;
 
+    //경력 연차
     private Integer experienceYears;
+
+    //고유 멤버 ID
     private String memberId;
+    
+    //이름
     private String name;
+    
+    //나이
     private Integer age;
 
+    //직무 상태
     @Enumerated(EnumType.STRING)
     private StatusCode statusCode;
 
+    //생성 날짜
     @CreatedDate
     private LocalDateTime createAt;
-
+    
+    //마지막 변경 날짜
     @LastModifiedDate
     private LocalDateTime updateAt;
 }

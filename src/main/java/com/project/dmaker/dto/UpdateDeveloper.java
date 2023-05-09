@@ -9,7 +9,18 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.validator.constraints.Range;
 
+/**
+ * 개발자 정보 변경 DTO
+ * @author cyh68
+ * @since 2023-05-08
+ **/
 public class UpdateDeveloper {
+
+    /**
+     * 개발자 정보 변경 요청 DTO
+     * @author cyh68
+     * @since 2023-05-08
+     **/
     @Getter
     @Setter
     @AllArgsConstructor

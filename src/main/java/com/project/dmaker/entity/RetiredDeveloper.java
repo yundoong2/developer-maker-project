@@ -11,6 +11,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * 퇴직 개발자 Entity
+ * @author cyh68
+ * @since 2023-05-08
+ **/
 @Getter
 @Setter
 @Builder
@@ -18,6 +23,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "RETIRED_DEVELOPER")
 public class RetiredDeveloper {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
